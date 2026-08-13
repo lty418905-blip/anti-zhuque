@@ -11,6 +11,14 @@ description: Generate, audit, and revise Chinese prose with the complete Human W
 
 本 Skill 默认考虑一种常见场景：全文由装载本 Skill 的同一个模型完成。为避免模型在第一稿阶段一边写一边机械自审，必须分开生成与审计。
 
+复杂新写、整体重写或带多项冻结约束的改稿，优先复制并填写`assets/structured-single-model-input-v1.xml`。该模板把说话位置、材料资格、冻结内容、输出契约、结构展开和阶段切换集中为一个可检查的输入，同时只向初稿阶段暴露正向生成约束。填写后可运行：
+
+```bash
+python scripts/validate_structured_input.py path/to/filled-input.xml
+```
+
+校验只检查结构、占位符、枚举、长度预算和必要字段，不联网，也不判断文本质量。简单短答可以直接依据用户请求执行，不强制套模板。
+
 ## 完整 Human Writing 底座
 
 嵌入版入口是 `references/human-writing/SKILL.md`。它及其全部参考、脚本、版本和 MIT 许可证均保留在 `references/human-writing/` 下。
@@ -29,18 +37,19 @@ description: Generate, audit, and revise Chinese prose with the complete Human W
 
 ### A. 从零生成或整体重写
 
-1. 完整读取 `references/human-writing/SKILL.md`。
-2. 按上面的任务路由读取全部适用的 Human Writing 正向参考。
-3. 读取 `references/generation-card.md`。它只补充单模型首稿所需的正向自然度要求，不取代 Human Writing。
-4. 按用户给定的事实、体裁、读者、口吻和长度完成一份完整初稿。现实材料不足时先研究、追问或缩短，不能靠复述灌字数。
-5. 初稿完成前，不读取 Human Writing 的 `revision.md`、本 Skill 的 `deep-audit.md`，不运行任何审稿脚本，也不把检测词表、风险标签或阈值塞进首稿提示。
-6. 将完整初稿冻结，再进入阶段 B。
+1. 复杂任务先把用户材料与要求填入`assets/structured-single-model-input-v1.xml`，复制结构单元使其覆盖实际内容，随后运行离线校验；不要为了填字段编造事实。
+2. 完整读取 `references/human-writing/SKILL.md`。
+3. 按上面的任务路由读取全部适用的 Human Writing 正向参考。
+4. 读取 `references/generation-card.md`。它只补充单模型首稿所需的正向自然度要求，不取代 Human Writing；使用结构化模板时，不再另抄一份同义生成规则进用户输入。
+5. 按用户给定的事实、体裁、读者、口吻和长度完成一份完整初稿。现实材料不足时先研究、追问或缩短，不能靠复述灌字数。
+6. 初稿完成前，不读取 Human Writing 的 `revision.md`、本 Skill 的 `deep-audit.md`，不运行任何审稿脚本，也不把检测词表、风险标签或阈值塞进首稿提示。
+7. 将完整初稿冻结，再进入阶段 B。
 
 用户只要快速初稿时可以在阶段 A 后停止。不要为了预防检测而边写边随机扰动。
 
 ### B. 审计已有文本
 
-1. 已有文本也先完整读取 `references/human-writing/SKILL.md` 及适用的文体参考，确认说话位置、事实边界、文体与人物规则。
+1. 复杂改稿可先填写结构化模板，选择`AUDIT_AND_REVISE`或`WHOLE_REWRITE_THEN_AUDIT`，把原文放入`source_text`并明确冻结项；已有文本也先完整读取 `references/human-writing/SKILL.md` 及适用的文体参考，确认说话位置、事实边界、文体与人物规则。
 2. 冻结事实、因果、立场、人物知识、叙事视角、必要情节、格式和原文已经成立的声音。
 3. 读取 `references/human-writing/references/revision.md`，执行完整 Human Writing 改稿流程。
 4. 需要机械定位时运行：

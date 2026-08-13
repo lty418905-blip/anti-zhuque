@@ -23,6 +23,7 @@
 - 动作与论证一一配对审计
 - 结尾过度闭合审计
 - 单模型“先生成、后审计”的上下文隔离流程
+- 可复制填写的单模型结构化输入模板与离线校验器
 
 ## 安装
 
@@ -56,6 +57,14 @@ git clone https://github.com/lty418905-blip/anti-zhuque.git "$env:CODEX_HOME\ski
 用 $natural-prose-audit 修改这篇科普。保留全部事实与限定，减少逐项论证、模板过渡和段尾总结，不要为了口语化牺牲准确性。
 ```
 
+复杂长文、完整小说章节、整体重写或约束较多的改稿，可以先复制`assets/structured-single-model-input-v1.xml`，填写材料、冻结项、声音和结构单元，再运行：
+
+```powershell
+python scripts\validate_structured_input.py path\to\filled-input.xml
+```
+
+模板支持`GENERATE_ONLY`、`GENERATE_THEN_AUDIT`、`AUDIT_AND_REVISE`和`WHOLE_REWRITE_THEN_AUDIT`。它把正向自然写作要求嵌入初稿输入，但仍把详细检测特征与深层审计留到初稿冻结之后。
+
 ## 单模型模式
 
 Skill 把一次完整任务拆成两个认知阶段：
@@ -86,9 +95,11 @@ python scripts\self_test.py
 
 - `references/human-writing/`：完整、保持原目录关系的 Human Writing 1.1.0，含入口、全部参考、脚本、版本与 MIT 许可证。
 - `references/generation-card.md`：单模型首稿阶段的简短正向补充。
+- `assets/structured-single-model-input-v1.xml`：通用单模型结构化输入，包含材料、冻结、声音、结构预算和阶段边界。
 - `references/deep-audit.md`：初稿完成后才读取的深层审计流程。
 - `references/fiction.md`、`references/nonfiction.md`：本仓库新增的深层审计分文体参考。
 - `scripts/audit_prose.py`：只读定位认知结构和表层代理。
+- `scripts/validate_structured_input.py`：离线检查结构化输入的占位符、枚举、材料、结构单元与长度预算。
 - `scripts/self_test.py`：验证两套检查器的基本边界。
 
 ## 方法边界

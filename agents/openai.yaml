@@ -1,4 +1,4 @@
 interface:
   display_name: "自然中文写作与审计"
-  short_description: "完整Human Writing加分阶段认知结构审计"
-  default_prompt: "Use $natural-prose-audit with the complete embedded Human Writing workflow, then perform the post-draft cognitive-structure audit while preserving facts, logic, author intent, and voice."
+  short_description: "结构化自然中文写作、完整Human Writing与分阶段认知审计"
+  default_prompt: "Use $natural-prose-audit and its structured single-model input when the task is complex, complete the Human Writing draft phase first, then perform the post-draft cognitive audit while preserving facts, logic, intent, and voice."
