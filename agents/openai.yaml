@@ -1,4 +1,4 @@
 interface:
   display_name: "自然中文写作与审计"
-  short_description: "单模型分阶段生成、深层自然度审计与保真改稿"
-  default_prompt: "Use $natural-prose-audit to draft or revise this Chinese text with a generation-first, audit-second workflow while preserving facts, logic, author intent, and voice."
+  short_description: "完整Human Writing加分阶段认知结构审计"
+  default_prompt: "Use $natural-prose-audit with the complete embedded Human Writing workflow, then perform the post-draft cognitive-structure audit while preserving facts, logic, author intent, and voice."

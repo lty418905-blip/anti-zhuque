@@ -1,39 +1,64 @@
 ---
 name: natural-prose-audit
-description: Generate, audit, and revise Chinese prose to reduce model-like regularity while preserving facts, reasoning accuracy, author intent, and voice. Use for Chinese fiction or nonfiction when users ask to humanize text, reduce AI or AIGC traces, diagnose overly polished or formulaic prose, or run a post-draft naturalness audit. Supports a single-model workflow from first draft through bounded revision. Never promise detector evasion or a Zhuque pass.
+description: Generate, audit, and revise Chinese prose with the complete Human Writing workflow plus a post-draft cognitive-structure audit. Use for Chinese fiction, long answers, forum posts, public-account articles, blogs, comments, profiles, history, news, industry analysis, popular science, tutorials, reviews, personal narratives, dialogue, scripts, speeches, or other Chinese prose when users ask to write naturally, humanize text, reduce AI or AIGC traces, diagnose overly polished or formulaic writing, or preserve voice during revision. Supports one model from first draft through bounded revision. Never promise detector evasion or a Zhuque pass.
 ---
 
 # Natural Prose Audit
 
-写出自然中文，减少模型化的规整感，同时保住事实、逻辑、人物、立场和专业准确性。检测器只能当提醒器，不能当作者，也不能当真实性裁判。
+本 Skill 完整嵌入通用 `human-writing` 1.1.0 作为写作底座，再增加初稿后的认知结构与模型化规整审计。它面向中文虚构与非虚构，不只服务 AIGC 检测场景。
 
-本 Skill 默认考虑一种常见场景：**全文由装载本 Skill 的同一个模型完成**。为避免模型在第一稿阶段一边写一边机械自审，严格分开生成与审计。
+检测器只能当提醒器，不能当作者、事实裁判或作者身份鉴定器。
+
+本 Skill 默认考虑一种常见场景：全文由装载本 Skill 的同一个模型完成。为避免模型在第一稿阶段一边写一边机械自审，必须分开生成与审计。
+
+## 完整 Human Writing 底座
+
+嵌入版入口是 `references/human-writing/SKILL.md`。它及其全部参考、脚本、版本和 MIT 许可证均保留在 `references/human-writing/` 下。
+
+所有新写、整体重写和实质改稿任务都先完整读取该入口，再按它的路由读取所需文件：
+
+- 知乎回答、论坛长帖、公众号、博客、评论、人物、历史和行业解读读取 `references/human-writing/references/forum-prose.md`。
+- 真人、历史、新闻、产品、数据、评测、教程、商业与用户亲历读取 `references/human-writing/references/reality.md`。
+- 小说、故事、对白与虚构叙事读取 `references/human-writing/references/fiction.md`。
+- 短文、个人叙事、教程、评测、口播、演讲、剧本、对白、诗歌等指定形式读取 `references/human-writing/references/formats.md`。
+- 初稿完成前不得读取 `references/human-writing/references/revision.md`。
+
+同一任务可能需要两份参考。例如现实人物长文同时读取论坛长文与现实核验，历史小说同时读取虚构与现实部分。
 
 ## 选择任务阶段
 
 ### A. 从零生成或整体重写
 
-1. 只读取 `references/generation-card.md`。
-2. 按用户给定的事实、体裁、读者、口吻和长度完成一份完整初稿。
-3. 初稿完成前，不读取 `references/deep-audit.md`，不运行脚本，不展示检测词表或风险标签。
-4. 将初稿视为冻结输入，再进入阶段 B。
+1. 完整读取 `references/human-writing/SKILL.md`。
+2. 按上面的任务路由读取全部适用的 Human Writing 正向参考。
+3. 读取 `references/generation-card.md`。它只补充单模型首稿所需的正向自然度要求，不取代 Human Writing。
+4. 按用户给定的事实、体裁、读者、口吻和长度完成一份完整初稿。现实材料不足时先研究、追问或缩短，不能靠复述灌字数。
+5. 初稿完成前，不读取 Human Writing 的 `revision.md`、本 Skill 的 `deep-audit.md`，不运行任何审稿脚本，也不把检测词表、风险标签或阈值塞进首稿提示。
+6. 将完整初稿冻结，再进入阶段 B。
 
-如果用户只要快速初稿，可以在阶段 A 后停止。不要为了预防检测而边写边随机扰动。
+用户只要快速初稿时可以在阶段 A 后停止。不要为了预防检测而边写边随机扰动。
 
 ### B. 审计已有文本
 
-1. 读取 `references/deep-audit.md`。
-2. 小说、故事、对白和叙事散文再读 `references/fiction.md`。
-3. 论说、科普、教程、评论、报告和长回答再读 `references/nonfiction.md`。
-4. 先建立不可改变项，再检查深层组织方式，最后检查表层节奏和措辞。
-5. 需要机械定位时运行：
+1. 已有文本也先完整读取 `references/human-writing/SKILL.md` 及适用的文体参考，确认说话位置、事实边界、文体与人物规则。
+2. 冻结事实、因果、立场、人物知识、叙事视角、必要情节、格式和原文已经成立的声音。
+3. 读取 `references/human-writing/references/revision.md`，执行完整 Human Writing 改稿流程。
+4. 需要机械定位时运行：
+
+```bash
+python references/human-writing/scripts/check_prose.py path/to/text.txt
+```
+
+5. 再读取 `references/deep-audit.md`。
+6. 小说、故事、对白和叙事散文另读 `references/fiction.md`；论说、科普、教程、评论、报告和长回答另读 `references/nonfiction.md`。
+7. 需要深层结构定位时运行：
 
 ```bash
 python scripts/audit_prose.py path/to/text.txt --mode fiction --structure
 python scripts/audit_prose.py path/to/text.txt --mode nonfiction --structure
 ```
 
-脚本只输出代理提醒，不判定作者身份，不自动改文，不给“AI率”。
+两个脚本都只输出代理提醒。它们不判定作者身份，不自动改文，不给“AI率”，也不能替代冷读。
 
 ### C. 有界修订
 
@@ -55,11 +80,11 @@ python scripts/audit_prose.py path/to/text.txt --mode nonfiction --structure
 
 ## 单模型工作纪律
 
-- 第一稿只接收正向写作要求，不接收详细风险词表、阈值、检测分数和逐项审稿清单。
-- 第一稿完成后再切换到编辑身份。先冷读全文，再打开深层审计参考。
-- 不把同一句来回同义改写；每处改动必须能说明删掉了什么重复功能，或恢复了什么具体声音。
+- 第一稿只接收完整 Human Writing 正向写作要求和生成卡，不接收详细风险词表、阈值、检测分数和逐项审稿清单。
+- 第一稿完成后再切换到编辑身份。先冷读全文，再打开 Human Writing 修订参考与深层审计参考。
+- 不把同一句来回同义改写。每处改动都要能说明删掉了什么重复功能，或恢复了什么具体声音。
 - 修订后再读一遍全文，确认事实、因果和口吻没有因“去 AI”被破坏。
-- 如果用户只要成稿，只交成稿；用户要审计时，再给简短的证据位置和处理理由。
+- 用户只要成稿时只交成稿。用户要求审计时，再给简短的证据位置和处理理由。
 
 ## 不可采用的捷径
 
@@ -71,11 +96,11 @@ python scripts/audit_prose.py path/to/text.txt --mode nonfiction --structure
 
 ## 交付前冷读
 
-- 能否看出是谁在说、他为什么现在说。
+- 能否看出是谁在说，他为什么现在说。
 - 每段是否带来事实、动作、判断、关系或理解变化。
 - 哪些句子过分完整，像替读者把所有推理都做完了。
 - 哪些转折、限定、总结和动作长期按同一节拍复现。
 - 删掉最后一句解释后，意思是否仍然成立。
 - 哪处不够漂亮，却恰好属于这个作者、人物或场景。
 
-方法与能力边界见 `references/methodology.md`。
+方法、来源、许可与能力边界见 `references/methodology.md`。
