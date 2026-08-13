@@ -186,6 +186,82 @@ def main() -> int:
             invalid_path.unlink()
         test_temp_root.rmdir()
 
+    split_template = (
+        skill_root / "assets" / "structured-single-model-input-v2-split.xml"
+    ).read_text(encoding="utf-8")
+    split_replacements = dict(replacements)
+    split_replacements.update(
+        {
+            "GENERATION_SCOPE": "PART_2",
+            "WORK_ID": "TEST-WORK-001",
+            "DRAFT_ROUND_ID": "TEST-DRAFT-001",
+            "FULL_WORK_TARGET_MIN": "2000",
+            "FULL_WORK_TARGET_MAX": "4000",
+            "SPLIT_MODE": "TWO_PART_CONTINUATION",
+            "PART_SEQUENCE": "2_OF_2",
+            "PRIOR_PART_STATUS": "COMPLETE_SAME_MODEL_SAME_DRAFT",
+            "PLANNED_ENTRY": "承接上半部最后一个动作",
+            "PLANNED_EXIT": "完成冲突并留下一个实际后果",
+            "LAST_VISIBLE_ACTION": "叙述者把未读完的纸放回桌面",
+            "TIME_PLACE_AND_BODY": "同一天下午，同一房间，人物仍坐在桌边",
+            "KNOWLEDGE_AND_RELATIONSHIP": "双方只知道已经说出口的内容，关系仍有保留",
+            "OBJECTS_AND_OPEN_THREADS": "纸在桌上，一个问题尚未回答",
+            "DO_NOT_REPEAT": "不重复人物介绍、房间介绍和上半部争论",
+            "SAME_DRAFT_PRIOR_PART_OR_NOT_APPLICABLE": "这是同一模型同一草稿轮次已经完成的完整上半部。",
+        }
+    )
+    split_filled = split_template
+    for key, value in split_replacements.items():
+        split_filled = split_filled.replace("{{" + key + "}}", value)
+    if "{{" in split_filled:
+        raise SystemExit("split structured input test did not fill every placeholder")
+
+    split_temp_root = base / f".self-test-split-{os.getpid()}"
+    if split_temp_root.exists():
+        raise SystemExit(f"self-test path already exists: {split_temp_root}")
+    split_temp_root.mkdir()
+    split_valid_path = split_temp_root / "valid-part2.xml"
+    split_invalid_path = split_temp_root / "invalid-part2.xml"
+    try:
+        split_valid_path.write_text(split_filled, encoding="utf-8")
+        split_valid_run = subprocess.run(
+            [sys.executable, str(base / "validate_structured_input.py"), str(split_valid_path)],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            env=env,
+        )
+        if split_valid_run.returncode != 0 or "STRUCTURED_INPUT_VALID=PASS" not in split_valid_run.stdout:
+            raise SystemExit(
+                "structured input validator rejected valid PART_2 fixture: "
+                + split_valid_run.stderr
+            )
+
+        split_invalid_path.write_text(
+            split_filled.replace(
+                "这是同一模型同一草稿轮次已经完成的完整上半部。",
+                "NOT_APPLICABLE",
+            ),
+            encoding="utf-8",
+        )
+        split_invalid_run = subprocess.run(
+            [sys.executable, str(base / "validate_structured_input.py"), str(split_invalid_path)],
+            check=False,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            env=env,
+        )
+        if split_invalid_run.returncode != 1 or "PART_2 requires complete same_draft_prior_part" not in split_invalid_run.stderr:
+            raise SystemExit("structured input validator did not reject PART_2 without prior fulltext")
+    finally:
+        if split_valid_path.exists():
+            split_valid_path.unlink()
+        if split_invalid_path.exists():
+            split_invalid_path.unlink()
+        split_temp_root.rmdir()
+
     print("SELF_TEST=PASS")
     return 0
 

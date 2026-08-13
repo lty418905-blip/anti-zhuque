@@ -24,6 +24,7 @@
 - 结尾过度闭合审计
 - 单模型“先生成、后审计”的上下文隔离流程
 - 可复制填写的单模型结构化输入模板与离线校验器
+- 同一模型同一草稿的`PART_1→PART_2`长文本生成、完整上文续写与接缝审计
 
 ## 安装
 
@@ -57,20 +58,21 @@ git clone https://github.com/lty418905-blip/anti-zhuque.git "$env:CODEX_HOME\ski
 用 $natural-prose-audit 修改这篇科普。保留全部事实与限定，减少逐项论证、模板过渡和段尾总结，不要为了口语化牺牲准确性。
 ```
 
-复杂长文、完整小说章节、整体重写或约束较多的改稿，可以先复制`assets/structured-single-model-input-v1.xml`，填写材料、冻结项、声音和结构单元，再运行：
+复杂长文、完整小说章节、整体重写或约束较多的改稿，可以先复制`assets/structured-single-model-input-v2-split.xml`，填写材料、冻结项、声音、当前部分、同稿上文、接缝和结构单元，再运行：
 
 ```powershell
 python scripts\validate_structured_input.py path\to\filled-input.xml
 ```
 
-模板支持`GENERATE_ONLY`、`GENERATE_THEN_AUDIT`、`AUDIT_AND_REVISE`和`WHOLE_REWRITE_THEN_AUDIT`。它把正向自然写作要求嵌入初稿输入，但仍把详细检测特征与深层审计留到初稿冻结之后。
+模板支持`GENERATE_ONLY`、`GENERATE_THEN_AUDIT`、`AUDIT_AND_REVISE`和`WHOLE_REWRITE_THEN_AUDIT`，也支持`FULL_TEXT`一次完成或同一模型以`PART_1→PART_2`完成一份长稿。`PART_2`必须携带同一draft round的完整`PART_1`和接缝状态，不是只给摘要。模板把正向自然写作要求嵌入初稿输入，但仍把详细检测特征与深层审计留到完整初稿冻结之后。旧V1模板继续可用。
 
 ## 单模型模式
 
 Skill 把一次完整任务拆成两个认知阶段：
 
 1. **生成阶段**读取完整 Human Writing 正向规则、适用文体参考和一张简短生成卡，不接触详细修订与深层审计特征。
-2. **审计阶段**冻结初稿事实和意图，再加载 Human Writing 修订流程与认知结构审计。
+2. **长文续写阶段（按需）**用同一模型、同一草稿身份和完整上半部生成下半部，先做接缝装配。
+3. **审计阶段**冻结完整初稿事实和意图，再加载 Human Writing 修订流程、接缝审计与认知结构审计。
 
 这不是物理模型隔离，但能避免单一模型在第一稿里同时执行几十条审稿规则，写出另一种更僵硬的模板。
 
@@ -95,7 +97,9 @@ python scripts\self_test.py
 
 - `references/human-writing/`：完整、保持原目录关系的 Human Writing 1.1.0，含入口、全部参考、脚本、版本与 MIT 许可证。
 - `references/generation-card.md`：单模型首稿阶段的简短正向补充。
-- `assets/structured-single-model-input-v1.xml`：通用单模型结构化输入，包含材料、冻结、声音、结构预算和阶段边界。
+- `assets/structured-single-model-input-v2-split.xml`：当前通用单模型结构化输入，兼容一次完整生成与同稿双段生成。
+- `assets/structured-single-model-input-v1.xml`：旧版兼容模板。
+- `references/split-longform.md`：长文本双段生成、完整上文续写、机械装配与接缝审计。
 - `references/deep-audit.md`：初稿完成后才读取的深层审计流程。
 - `references/fiction.md`、`references/nonfiction.md`：本仓库新增的深层审计分文体参考。
 - `scripts/audit_prose.py`：只读定位认知结构和表层代理。

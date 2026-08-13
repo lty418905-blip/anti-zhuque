@@ -8,7 +8,9 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 
 
-SCHEMA = "NATURAL_PROSE_STRUCTURED_INPUT_V1"
+SCHEMA_V1 = "NATURAL_PROSE_STRUCTURED_INPUT_V1"
+SCHEMA_V2 = "NATURAL_PROSE_STRUCTURED_INPUT_V2_SPLIT"
+SCHEMAS = {SCHEMA_V1, SCHEMA_V2}
 MODES = {
     "GENERATE_ONLY",
     "GENERATE_THEN_AUDIT",
@@ -18,6 +20,10 @@ MODES = {
 REALITY_CONTRACTS = {"REAL", "FICTION", "MIXED"}
 SOURCE_STATUSES = {"USER_PROVIDED", "VERIFIED_SOURCE", "FICTION_AUTHORIZED"}
 LENGTH_UNITS = {"zh_characters", "approx_words", "seconds", "lines"}
+GENERATION_SCOPES = {"FULL_TEXT", "PART_1", "PART_2"}
+SPLIT_MODES = {"SINGLE_PASS", "TWO_PART_CONTINUATION"}
+PART_SEQUENCES = {"1_OF_1", "1_OF_2", "2_OF_2"}
+PRIOR_PART_STATUSES = {"NOT_APPLICABLE", "COMPLETE_SAME_MODEL_SAME_DRAFT"}
 EXPECTED_CONSTRAINTS = {f"NPA-{index:02d}" for index in range(1, 15)}
 PLACEHOLDER = re.compile(r"\{\{[A-Z0-9_]+\}\}")
 
@@ -56,8 +62,9 @@ def validate(path: Path) -> list[str]:
 
     if root.tag != "natural_prose_request":
         errors.append("root element must be natural_prose_request")
-    if root.attrib.get("schema") != SCHEMA:
-        errors.append(f"schema must be {SCHEMA}")
+    schema = root.attrib.get("schema")
+    if schema not in SCHEMAS:
+        errors.append("schema must be one of: " + ", ".join(sorted(SCHEMAS)))
 
     required_paths = [
         "./task_identity/mode",
@@ -95,6 +102,31 @@ def validate(path: Path) -> list[str]:
         if not text_at(root, required):
             errors.append(f"missing or empty field: {required}")
 
+    if schema == SCHEMA_V2:
+        split_required_paths = [
+            "./task_identity/generation_scope",
+            "./task_identity/work_id",
+            "./task_identity/draft_round_id",
+            "./output_contract/full_work_target_min",
+            "./output_contract/full_work_target_max",
+            "./split_contract/split_mode",
+            "./split_contract/part_sequence",
+            "./split_contract/same_model_same_draft",
+            "./split_contract/prior_part_status",
+            "./split_contract/planned_entry",
+            "./split_contract/planned_exit",
+            "./split_contract/seam_state/last_visible_action",
+            "./split_contract/seam_state/time_place_and_body",
+            "./split_contract/seam_state/knowledge_and_relationship",
+            "./split_contract/seam_state/objects_and_open_threads",
+            "./split_contract/seam_state/do_not_repeat",
+            "./split_contract/same_draft_prior_part",
+            "./split_contract/assembly_contract",
+        ]
+        for required in split_required_paths:
+            if not text_at(root, required):
+                errors.append(f"missing or empty field: {required}")
+
     mode = text_at(root, "./task_identity/mode")
     if mode not in MODES:
         errors.append("unsupported mode")
@@ -113,6 +145,23 @@ def validate(path: Path) -> list[str]:
     except ValueError as exc:
         errors.append(str(exc))
         target_min = target_max = 0
+
+    if schema == SCHEMA_V2:
+        try:
+            full_target_min = positive_int(
+                text_at(root, "./output_contract/full_work_target_min"),
+                "full_work_target_min",
+            )
+            full_target_max = positive_int(
+                text_at(root, "./output_contract/full_work_target_max"),
+                "full_work_target_max",
+            )
+            if full_target_min > full_target_max:
+                errors.append("full_work_target_min must not exceed full_work_target_max")
+            if target_max and target_max > full_target_max:
+                errors.append("current target_max must not exceed full_work_target_max")
+        except ValueError as exc:
+            errors.append(str(exc))
 
     sources = root.findall("./materials/source")
     if not sources:
@@ -168,6 +217,48 @@ def validate(path: Path) -> list[str]:
         errors.append(f"{mode} requires source_text")
     if mode in MODES - source_modes and source_text != "NOT_APPLICABLE":
         errors.append(f"{mode} requires source_text=NOT_APPLICABLE")
+
+    if schema == SCHEMA_V2:
+        generation_scope = text_at(root, "./task_identity/generation_scope")
+        split_mode = text_at(root, "./split_contract/split_mode")
+        part_sequence = text_at(root, "./split_contract/part_sequence")
+        same_model = text_at(root, "./split_contract/same_model_same_draft")
+        prior_status = text_at(root, "./split_contract/prior_part_status")
+        prior_part = text_at(root, "./split_contract/same_draft_prior_part")
+
+        if generation_scope not in GENERATION_SCOPES:
+            errors.append("unsupported generation_scope")
+        if split_mode not in SPLIT_MODES:
+            errors.append("unsupported split_mode")
+        if part_sequence not in PART_SEQUENCES:
+            errors.append("unsupported part_sequence")
+        if same_model != "true":
+            errors.append("same_model_same_draft must be true")
+        if prior_status not in PRIOR_PART_STATUSES:
+            errors.append("unsupported prior_part_status")
+
+        expected = {
+            "FULL_TEXT": ("SINGLE_PASS", "1_OF_1", "NOT_APPLICABLE"),
+            "PART_1": ("TWO_PART_CONTINUATION", "1_OF_2", "NOT_APPLICABLE"),
+            "PART_2": (
+                "TWO_PART_CONTINUATION",
+                "2_OF_2",
+                "COMPLETE_SAME_MODEL_SAME_DRAFT",
+            ),
+        }
+        if generation_scope in expected:
+            wanted_mode, wanted_sequence, wanted_status = expected[generation_scope]
+            if split_mode != wanted_mode:
+                errors.append(f"{generation_scope} requires split_mode={wanted_mode}")
+            if part_sequence != wanted_sequence:
+                errors.append(f"{generation_scope} requires part_sequence={wanted_sequence}")
+            if prior_status != wanted_status:
+                errors.append(f"{generation_scope} requires prior_part_status={wanted_status}")
+        if generation_scope == "PART_2":
+            if prior_part == "NOT_APPLICABLE":
+                errors.append("PART_2 requires complete same_draft_prior_part")
+        elif prior_part != "NOT_APPLICABLE":
+            errors.append(f"{generation_scope or 'this scope'} requires same_draft_prior_part=NOT_APPLICABLE")
 
     return errors
 
