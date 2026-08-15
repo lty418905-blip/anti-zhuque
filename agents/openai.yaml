@@ -1,4 +1,4 @@
 interface:
   display_name: "自然中文写作与证据审计"
-  short_description: "完整Human Writing、结构化生成、主病灶分流与保真修订"
-  default_prompt: "Use $natural-prose-audit to complete the Human Writing draft phase first, then blind-read the full text, identify one primary finding, distinguish localized issues from distributed voice or structural problems, and revise only with detector-independent reasons while preserving facts, logic, intent, and voice."
+  short_description: "完整Human Writing、主病灶分流与最终文本卫生"
+  default_prompt: "Use $natural-prose-audit to draft and audit this Chinese prose with one primary finding, preserve facts and voice, then inspect and clean only high-confidence invisible Unicode controls after the final text is frozen."

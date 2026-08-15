@@ -8,6 +8,66 @@ import sys
 from pathlib import Path
 
 
+def test_unicode_layer_a(base: Path, env: dict[str, str]) -> None:
+    layer_script = base / "unicode_layer_a.py"
+    fixture_text = "\ufeff甲\u200b乙\u2060丙\u00ad丁\u202e戊\ufeff己\u200c庚\u200d辛\ufe0f"
+    temp_root = base / f".layer-a-self-test-{os.getpid()}"
+    if temp_root.exists():
+        raise SystemExit(f"Layer A self-test path already exists: {temp_root}")
+    temp_root.mkdir()
+    source = temp_root / "source.txt"
+    output = temp_root / "source.layer-a-clean.txt"
+    try:
+        source.write_text(fixture_text, encoding="utf-8")
+        source_before = source.read_bytes()
+
+        inspect_run = subprocess.run(
+            [sys.executable, str(layer_script), "inspect", str(source), "--compact"],
+            check=True, capture_output=True, text=True, encoding="utf-8", env=env,
+        )
+        inspected = json.loads(inspect_run.stdout)
+        if inspected["scan"]["high_confidence_total"] != 5:
+            raise SystemExit("Layer A inspect missed removable controls")
+        if inspected["scan"]["preserved_semantic_total"] != 3:
+            raise SystemExit("Layer A inspect missed preserved semantic controls")
+        if inspected["scan"]["initial_bom_preserved"] != 1:
+            raise SystemExit("Layer A inspect did not preserve initial BOM")
+
+        clean_run = subprocess.run(
+            [sys.executable, str(layer_script), "clean", str(source), "--compact"],
+            check=True, capture_output=True, text=True, encoding="utf-8", env=env,
+        )
+        cleaned = json.loads(clean_run.stdout)
+        if source.read_bytes() != source_before or cleaned["source_modified"]:
+            raise SystemExit("Layer A clean modified the source")
+        if Path(cleaned["output"]) != output.resolve():
+            raise SystemExit("Layer A clean did not use the non-in-place default output")
+        if cleaned["removed_total"] != 5:
+            raise SystemExit("Layer A clean removed unexpected count")
+        if cleaned["post_clean_scan"]["high_confidence_total"] != 0:
+            raise SystemExit("Layer A post-clean scan is not zero")
+        output_text = output.read_text(encoding="utf-8")
+        for preserved in ("\u200c", "\u200d", "\ufe0f"):
+            if preserved not in output_text:
+                raise SystemExit("Layer A clean removed a semantic control")
+        if not output_text.startswith("\ufeff"):
+            raise SystemExit("Layer A clean removed the initial BOM")
+
+        in_place_run = subprocess.run(
+            [
+                sys.executable, str(layer_script), "clean", str(source),
+                "--output", str(source), "--compact",
+            ],
+            check=False, capture_output=True, text=True, encoding="utf-8", env=env,
+        )
+        if in_place_run.returncode == 0 or "refusing in-place clean" not in in_place_run.stderr:
+            raise SystemExit("Layer A did not refuse in-place output")
+    finally:
+        source.unlink(missing_ok=True)
+        output.unlink(missing_ok=True)
+        temp_root.rmdir()
+
+
 def main() -> int:
     base = Path(__file__).resolve().parent
     skill_root = base.parent
@@ -55,6 +115,7 @@ def main() -> int:
     }
     if any(item.get("action") not in allowed_actions for item in result["findings"]):
         raise SystemExit("unexpected automatic action")
+    test_unicode_layer_a(base, env)
     required_manual_review = {
         "blind_full_text_read_before_detector_report",
         "single_primary_finding",

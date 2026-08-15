@@ -29,6 +29,7 @@
 - `LOCALIZED_SURFACE / DISTRIBUTED_VOICE / STRUCTURAL`分流
 - 检测输入可比性、公开分段边界和反向效果核验
 - 改后全文重新冻结、事实／因果／口吻回归与目标对齐检查
+- 最终文本冻结后的保守Unicode Layer A检查、非原地清理与清理后复检
 
 ## 安装
 
@@ -99,6 +100,15 @@ python scripts\self_test.py
 
 脚本只定位待人工判断的形状。它们不会修改输入，不联网，不计算真实困惑度，不返回检测通过结论。
 
+最终可见文本完成全部语义修订并冻结后，可以先检查、再清理高置信不可见Unicode控制字符：
+
+```powershell
+python scripts\unicode_layer_a.py inspect example.txt
+python scripts\unicode_layer_a.py clean example.txt
+```
+
+clean默认生成`example.layer-a-clean.txt`，不覆盖源文件；ZWJ、ZWNJ、variation selectors与emoji tag等可能承载语言或emoji语义的字符只报告并保留。Layer A不做统计重写或媒体元数据清理，不降低采样水印或AI率，也不证明人工写作。
+
 ## 目录说明
 
 - `references/human-writing/`：完整、保持原目录关系的 Human Writing 1.1.0，含入口、全部参考、脚本、版本与 MIT 许可证。
@@ -108,9 +118,11 @@ python scripts\self_test.py
 - `references/split-longform.md`：长文本双段生成、完整上文续写、机械装配与接缝审计。
 - `references/deep-audit.md`：初稿完成后才读取的深层审计流程。
 - `references/detector-evidence-workflow.md`：盲态主病灶、检测证据等级、分段边界、反向效果与改后验证。
+- `references/unicode-layer-a.md`：保守Unicode文本卫生的码点边界、顺序与许可说明。
 - `references/fiction.md`、`references/nonfiction.md`：本仓库新增的深层审计分文体参考。
 - `scripts/audit_prose.py`：只读定位认知结构和表层代理。
 - `scripts/validate_structured_input.py`：离线检查结构化输入的占位符、枚举、材料、结构单元与长度预算。
+- `scripts/unicode_layer_a.py`：只读检查并清理高置信不可见Unicode控制字符，默认输出新文件。
 - `scripts/self_test.py`：验证两套检查器的基本边界。
 
 ## 方法边界

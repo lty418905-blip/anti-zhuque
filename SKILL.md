@@ -112,6 +112,19 @@ python scripts/audit_prose.py path/to/text.txt --mode nonfiction --structure
 - 检测报告存在分段时，只能约束该报告公开覆盖的文本区间；不得把一个分段的结论外推到全文或其他作者轮次。
 - 改后重新冻结完整文本，逐项回归事实、因果、立场、人物或说话者知识、声音和交付接口。若有同条件新报告，只能作改后对照证据；不得把分数变化写成文学因果或成功保证。
 
+## 最终文本 Layer A
+
+完成所有语义写作、作者级重写、有界修订和全文回归后，冻结最终可见文本，再读取`references/unicode-layer-a.md`并执行：
+
+```bash
+python scripts/unicode_layer_a.py inspect path/to/text.txt
+python scripts/unicode_layer_a.py clean path/to/text.txt
+```
+
+clean默认写入新文件，不原地覆盖，并输出逐码点计数、移除总数和清理后复检。ZWJ、ZWNJ、variation selectors与emoji tag等可能承载语言或emoji语义的字符默认只报告并保留。若Layer A后发生任何语义改写，必须对新冻结全文重新inspect与clean。
+
+Layer A只清理高置信不可见文本控制字符，不做Layer B统计重写，不处理C2PA、EXIF、PDF或图片元数据，不降低采样水印或AI率，也不证明人工写作。
+
 ## 不可采用的捷径
 
 - 不故意加错字、病句、冷僻词、无意义跳跃、虚假经历或错误事实。
