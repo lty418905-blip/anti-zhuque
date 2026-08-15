@@ -1,13 +1,13 @@
 ---
 name: natural-prose-audit
-description: Generate, audit, and revise Chinese prose with the complete Human Writing workflow plus a post-draft cognitive-structure audit. Use for Chinese fiction, long answers, forum posts, public-account articles, blogs, comments, profiles, history, news, industry analysis, popular science, tutorials, reviews, personal narratives, dialogue, scripts, speeches, or other Chinese prose when users ask to write naturally, humanize text, reduce AI or AIGC traces, diagnose overly polished or formulaic writing, or preserve voice during revision. Supports one model from first draft through bounded revision. Never promise detector evasion or a Zhuque pass.
+description: Generate, audit, and revise Chinese prose with the complete Human Writing workflow, structured single-model drafting, and evidence-disciplined post-draft diagnosis. Use for Chinese fiction or nonfiction when users ask to write naturally, humanize text, reduce AI or AIGC traces, interpret a detector report, compare before and after versions, diagnose overly polished or formulaic writing, or preserve voice during bounded revision. Distinguishes localized surface issues from distributed voice or structural problems and routes the latter to author-level rewriting. Never promise detector evasion, authorship proof, a target score, or a detector pass.
 ---
 
 # Natural Prose Audit
 
 本 Skill 完整嵌入通用 `human-writing` 1.1.0 作为写作底座，再增加初稿后的认知结构与模型化规整审计。它面向中文虚构与非虚构，不只服务 AIGC 检测场景。
 
-检测器只能当提醒器，不能当作者、事实裁判或作者身份鉴定器。
+检测器只能当定位提醒，不能当作者、事实裁判、因果裁判或作者身份鉴定器。任何报告都必须排在独立文学冷读之后。
 
 本 Skill 默认考虑一种常见场景：全文由装载本 Skill 的同一个模型完成。为避免模型在第一稿阶段一边写一边机械自审，必须分开生成与审计。
 
@@ -51,16 +51,18 @@ python scripts/validate_structured_input.py path/to/filled-input.xml
 
 1. 复杂改稿可先填写结构化模板，选择`AUDIT_AND_REVISE`或`WHOLE_REWRITE_THEN_AUDIT`，把原文放入`source_text`并明确冻结项；已有文本也先完整读取 `references/human-writing/SKILL.md` 及适用的文体参考，确认说话位置、事实边界、文体与人物规则。
 2. 冻结事实、因果、立场、人物知识、叙事视角、必要情节、格式和原文已经成立的声音。双段文本还须冻结两部分身份与接缝状态，先按`references/split-longform.md`检查接缝，再审全篇。
-3. 读取 `references/human-writing/references/revision.md`，执行完整 Human Writing 改稿流程。
-4. 需要机械定位时运行：
+3. 暂时不看检测分数和高风险定位，完整冷读全文并只锁定一个`PRIMARY_FINDING`。同时登记`FINDING_SCOPE=LOCALIZED_SURFACE|DISTRIBUTED_VOICE|STRUCTURAL|UNKNOWN`、`VOICE_PROTECTION`和没有检测器时仍会修改的文学理由。
+4. 读取 `references/human-writing/references/revision.md`，执行完整 Human Writing 改稿流程。
+5. 需要机械定位时运行：
 
 ```bash
 python references/human-writing/scripts/check_prose.py path/to/text.txt
 ```
 
-5. 再读取 `references/deep-audit.md`。
-6. 小说、故事、对白和叙事散文另读 `references/fiction.md`；论说、科普、教程、评论、报告和长回答另读 `references/nonfiction.md`。
-7. 需要深层结构定位时运行：
+6. 再读取 `references/deep-audit.md`。
+7. 小说、故事、对白和叙事散文另读 `references/fiction.md`；论说、科普、教程、评论、报告和长回答另读 `references/nonfiction.md`。
+8. 用户提供检测报告、前后分数或分段定位时，完整读取`references/detector-evidence-workflow.md`，先核验输入可比性和报告边界，再把报告与盲态主病灶对照。单次报告不能独立触发改文。
+9. 需要深层结构定位时运行：
 
 ```bash
 python scripts/audit_prose.py path/to/text.txt --mode fiction --structure
@@ -68,6 +70,15 @@ python scripts/audit_prose.py path/to/text.txt --mode nonfiction --structure
 ```
 
 两个脚本都只输出代理提醒。它们不判定作者身份，不自动改文，不给“AI率”，也不能替代冷读。
+
+## 主病灶分流
+
+- `LOCALIZED_SURFACE`：一个连续局部可以一次改清，改后不需要连动其他位置。只有它可以进入同轮有界修订。
+- `DISTRIBUTED_VOICE`：同一物件、判断、语调、段落功能或解释程序跨多个位置反复承担同一功能。停止局部清洗，转为`AUTHOR_LEVEL_REWRITE`，或保持正文不变并登记`PRIMARY_FINDING_UNRESOLVED`。
+- `STRUCTURAL`：问题依赖重排材料、场景、论证顺序、人物议程或结论接口。退出自然度修订，先解决结构。
+- `UNKNOWN`：证据不足。保留正文，不用检测分数替代判断。
+
+不得删除一两句弱相关文字后把`DISTRIBUTED_VOICE`或`STRUCTURAL`改名为已修复。事实纠错、格式修正和机械清理也不能冒充主病灶修复。
 
 ### C. 有界修订
 
@@ -85,6 +96,8 @@ python scripts/audit_prose.py path/to/text.txt --mode nonfiction --structure
 - `BOUNDED_REPHRASE`：只改表达和呈现顺序，不改冻结内容。
 - `REVIEW_FLAG`：无法安全判断，保留并说明需要作者决定什么。
 
+每个改动还必须同时通过两问：没有检测器时是否仍会改；是否直接命中本轮`PRIMARY_FINDING`。任一答案为否，不改。若改后自然引出第二处、第三处必须一起调整，立即重新分类为`DISTRIBUTED_VOICE`，撤销局部修订并转作者级重写。
+
 改动若触及冻结项，停止自然度修订，向用户说明这是事实、结构或立场修改。
 
 ## 单模型工作纪律
@@ -96,6 +109,8 @@ python scripts/audit_prose.py path/to/text.txt --mode nonfiction --structure
 - 用户只要成稿时只交成稿。用户要求审计时，再给简短的证据位置和处理理由。
 - 双段不是两个作者。`PART_2`必须读取同一模型同一草稿轮次的完整`PART_1`和接缝状态；只给摘要无法保证精确连续。
 - 双段装配只标准化一个接缝换行。任何补写、删写或重排都属于后置修订，不得静默发生。
+- 检测报告存在分段时，只能约束该报告公开覆盖的文本区间；不得把一个分段的结论外推到全文或其他作者轮次。
+- 改后重新冻结完整文本，逐项回归事实、因果、立场、人物或说话者知识、声音和交付接口。若有同条件新报告，只能作改后对照证据；不得把分数变化写成文学因果或成功保证。
 
 ## 不可采用的捷径
 
@@ -113,5 +128,6 @@ python scripts/audit_prose.py path/to/text.txt --mode nonfiction --structure
 - 哪些转折、限定、总结和动作长期按同一节拍复现。
 - 删掉最后一句解释后，意思是否仍然成立。
 - 哪处不够漂亮，却恰好属于这个作者、人物或场景。
+- 实际差分是否命中`PRIMARY_FINDING`；若没有，明确写`PRIMARY_FINDING_UNRESOLVED`。
 
-方法、来源、许可与能力边界见 `references/methodology.md`。
+检测报告、反向效果、分段边界和改后验证见`references/detector-evidence-workflow.md`。方法、来源、许可与能力边界见 `references/methodology.md`。

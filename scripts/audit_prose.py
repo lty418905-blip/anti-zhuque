@@ -232,6 +232,13 @@ def analyze(path: Path, mode: str, structure: bool) -> dict:
         },
         "finding_count": len(findings),
         "findings": findings,
+        "manual_review_required": [
+            "blind_full_text_read_before_detector_report",
+            "single_primary_finding",
+            "localized_surface_vs_distributed_voice_vs_structural",
+            "detector_independent_reason",
+            "target_alignment_and_full_text_regression",
+        ],
         "verdict": "warnings_only_no_authorship_or_detector_claim",
     }
 

@@ -55,6 +55,15 @@ def main() -> int:
     }
     if any(item.get("action") not in allowed_actions for item in result["findings"]):
         raise SystemExit("unexpected automatic action")
+    required_manual_review = {
+        "blind_full_text_read_before_detector_report",
+        "single_primary_finding",
+        "localized_surface_vs_distributed_voice_vs_structural",
+        "detector_independent_reason",
+        "target_alignment_and_full_text_regression",
+    }
+    if set(result.get("manual_review_required", [])) != required_manual_review:
+        raise SystemExit("manual primary-finding review contract changed")
 
     human_root = skill_root / "references" / "human-writing"
     required_human_files = {
@@ -77,6 +86,43 @@ def main() -> int:
         raise SystemExit(f"missing embedded Human Writing files: {missing_human_files}")
     if (human_root / "VERSION").read_text(encoding="utf-8").strip() != "1.1.0":
         raise SystemExit("unexpected embedded Human Writing version")
+
+    detector_reference = (
+        skill_root / "references" / "detector-evidence-workflow.md"
+    ).read_text(encoding="utf-8")
+    required_detector_terms = {
+        "PRIMARY_FINDING",
+        "LOCALIZED_SURFACE",
+        "DISTRIBUTED_VOICE",
+        "STRUCTURAL",
+        "DETECTOR_INDEPENDENT_REASON",
+        "AUTHOR_LEVEL_REWRITE",
+        "TARGET_ALIGNMENT",
+        "FULL_TEXT_REGRESSION_CHECK",
+        "PRIMARY_FINDING_UNRESOLVED",
+    }
+    missing_detector_terms = sorted(
+        term for term in required_detector_terms if term not in detector_reference
+    )
+    if missing_detector_terms:
+        raise SystemExit(
+            f"detector evidence reference missing terms: {missing_detector_terms}"
+        )
+
+    public_text_files = [
+        path for path in skill_root.rglob("*")
+        if (path.is_file()
+            and path.suffix.lower() in {".md", ".xml", ".yaml", ".py"}
+            and path.name != "self_test.py")
+    ]
+    public_text = "\n".join(path.read_text(encoding="utf-8") for path in public_text_files)
+    forbidden_project_terms = {
+        "林砚舟", "赫敏", "D:\\shipinzhizuo", "科研顾问", "世界观审查",
+        "GEMINI_PRIMARY", "NEXAPI", "speed.toter.me",
+    }
+    leaked_terms = sorted(term for term in forbidden_project_terms if term in public_text)
+    if leaked_terms:
+        raise SystemExit(f"project-specific terms leaked into public skill: {leaked_terms}")
 
     human_run = subprocess.run(
         [
@@ -189,6 +235,12 @@ def main() -> int:
     split_template = (
         skill_root / "assets" / "structured-single-model-input-v2-split.xml"
     ).read_text(encoding="utf-8")
+    for required_phase in (
+        "<detector_evidence_phase>",
+        "<post_revision_phase>",
+    ):
+        if required_phase not in split_template:
+            raise SystemExit(f"split template missing phase: {required_phase}")
     split_replacements = dict(replacements)
     split_replacements.update(
         {

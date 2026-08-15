@@ -108,6 +108,8 @@
     <continuation_phase>PART_2把same_draft_prior_part当作同一作者同一草稿的既成上文；从seam_state继续，不概述上文，不重做开场，不擅改上半部。</continuation_phase>
     <freeze_phase>完整稿或双段装配稿完成后，先冻结事实、因果、立场、人物知识、必要结构、接缝状态和已经成立的声音。</freeze_phase>
     <audit_phase>只有在冻结并装配之后，才按Skill阶段B和C读取修订、接缝与深层审计参考，进行保真的有界修订。</audit_phase>
+    <detector_evidence_phase>如有检测报告，先在不看分数和定位时完成全文冷读并锁定单一主病灶，再核验输入可比性、分段边界和检测独立文学理由；分布式声线或结构问题不得用局部删句冒充修复。</detector_evidence_phase>
+    <post_revision_phase>改后重新冻结完整文本，执行事实、因果、立场、知识、口吻和交付接口回归；任何新检测只作对照证据，不承诺分数或通过。</post_revision_phase>
   </phase_protocol>
 
   <final_silent_check>结束前静默核对材料边界、冻结项、当前部分全部结构单元、当前与全篇长度目标、说话位置、接缝和交付格式。不要输出核对过程。若用户只要成稿，只返回当前部分正文。</final_silent_check>
