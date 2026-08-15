@@ -1,0 +1,116 @@
+<natural_prose_request schema="NATURAL_PROSE_STRUCTURED_INPUT_V2_SPLIT">
+  <task_identity>
+    <mode>{{MODE}}</mode>
+    <genre>{{GENRE}}</genre>
+    <reality_contract>{{REALITY_CONTRACT}}</reality_contract>
+    <language>zh-CN</language>
+    <generation_scope>{{GENERATION_SCOPE}}</generation_scope>
+    <work_id>{{WORK_ID}}</work_id>
+    <draft_round_id>{{DRAFT_ROUND_ID}}</draft_round_id>
+  </task_identity>
+
+  <output_contract>
+    <deliverable>{{DELIVERABLE}}</deliverable>
+    <length_unit>{{LENGTH_UNIT}}</length_unit>
+    <target_min>{{TARGET_MIN}}</target_min>
+    <target_max>{{TARGET_MAX}}</target_max>
+    <full_work_target_min>{{FULL_WORK_TARGET_MIN}}</full_work_target_min>
+    <full_work_target_max>{{FULL_WORK_TARGET_MAX}}</full_work_target_max>
+    <format>{{OUTPUT_FORMAT}}</format>
+    <must_include>{{MUST_INCLUDE}}</must_include>
+    <must_not_include>{{MUST_NOT_INCLUDE}}</must_not_include>
+  </output_contract>
+
+  <split_contract>
+    <split_mode>{{SPLIT_MODE}}</split_mode>
+    <part_sequence>{{PART_SEQUENCE}}</part_sequence>
+    <same_model_same_draft>true</same_model_same_draft>
+    <prior_part_status>{{PRIOR_PART_STATUS}}</prior_part_status>
+    <planned_entry>{{PLANNED_ENTRY}}</planned_entry>
+    <planned_exit>{{PLANNED_EXIT}}</planned_exit>
+    <seam_state>
+      <last_visible_action>{{LAST_VISIBLE_ACTION}}</last_visible_action>
+      <time_place_and_body>{{TIME_PLACE_AND_BODY}}</time_place_and_body>
+      <knowledge_and_relationship>{{KNOWLEDGE_AND_RELATIONSHIP}}</knowledge_and_relationship>
+      <objects_and_open_threads>{{OBJECTS_AND_OPEN_THREADS}}</objects_and_open_threads>
+      <do_not_repeat>{{DO_NOT_REPEAT}}</do_not_repeat>
+    </seam_state>
+    <same_draft_prior_part><![CDATA[{{SAME_DRAFT_PRIOR_PART_OR_NOT_APPLICABLE}}]]></same_draft_prior_part>
+    <assembly_contract>同一draft_round_id的两个部分只按顺序拼接并标准化一个接缝换行；不得在装配时静默增写、删写或重排。</assembly_contract>
+  </split_contract>
+
+  <speaker_and_reader>
+    <speaker>{{SPEAKER}}</speaker>
+    <knowledge_basis>{{KNOWLEDGE_BASIS}}</knowledge_basis>
+    <current_reason_to_write>{{CURRENT_REASON_TO_WRITE}}</current_reason_to_write>
+    <reader>{{READER}}</reader>
+    <desired_effect>{{DESIRED_EFFECT}}</desired_effect>
+  </speaker_and_reader>
+
+  <materials>
+    <source id="S1" status="{{SOURCE_STATUS}}">{{SOURCE_MATERIAL}}</source>
+    <known_unknowns>{{KNOWN_UNKNOWNS}}</known_unknowns>
+    <research_permission>{{RESEARCH_PERMISSION}}</research_permission>
+  </materials>
+
+  <freeze_contract>
+    <facts_and_evidence>{{FROZEN_FACTS_AND_EVIDENCE}}</facts_and_evidence>
+    <causality_and_position>{{FROZEN_CAUSALITY_AND_POSITION}}</causality_and_position>
+    <voice_or_character_knowledge>{{FROZEN_VOICE_OR_CHARACTER_KNOWLEDGE}}</voice_or_character_knowledge>
+    <required_examples_or_plot_beats>{{FROZEN_EXAMPLES_OR_PLOT_BEATS}}</required_examples_or_plot_beats>
+  </freeze_contract>
+
+  <voice_and_form>
+    <voice>{{VOICE}}</voice>
+    <tone>{{TONE}}</tone>
+    <point_of_view>{{POINT_OF_VIEW}}</point_of_view>
+    <form_constraints>{{FORM_CONSTRAINTS}}</form_constraints>
+    <highlights_to_preserve>{{HIGHLIGHTS_TO_PRESERVE}}</highlights_to_preserve>
+  </voice_and_form>
+
+  <structure_plan>
+    <unit id="U1">
+      <suggested_length>{{UNIT_1_LENGTH}}</suggested_length>
+      <function>{{UNIT_1_FUNCTION}}</function>
+      <material_or_action>{{UNIT_1_MATERIAL_OR_ACTION}}</material_or_action>
+      <change_or_consequence>{{UNIT_1_CHANGE_OR_CONSEQUENCE}}</change_or_consequence>
+      <exit>{{UNIT_1_EXIT}}</exit>
+    </unit>
+  </structure_plan>
+
+  <positive_generation_constraints>
+    <constraint id="NPA-01">先确定具体说话者、读者、写作目的和当下处境。</constraint>
+    <constraint id="NPA-02">现实材料不足时研究、追问、缩短或明确保留未知，不靠重复解释补长度。</constraint>
+    <constraint id="NPA-03">信息按说话者实际会注意到的顺序出现，不默认套用定义、三点和总结。</constraint>
+    <constraint id="NPA-04">多个表达同样准确时，选择符合身份、关系、经验和压力的说法，不总选最圆滑的标准答案。</constraint>
+    <constraint id="NPA-05">用具体名词、动作、物件、例子和后果托住正文，抽象评价只在确有需要时出现。</constraint>
+    <constraint id="NPA-06">允许普通句子和普通段落承担连接工作，不要求每段都有金句、升华或悬念。</constraint>
+    <constraint id="NPA-07">动作、事实或例子已经表达清楚后，不再追加同义解释尾巴。</constraint>
+    <constraint id="NPA-08">节奏服从内容压力；长短变化来自动作、思考和材料，不按固定比例制造。</constraint>
+    <constraint id="NPA-09">精确内容使用稳定、准确的表达，不为表面多样随机替换术语或证据等级。</constraint>
+    <constraint id="NPA-10">虚构场景由目标、阻力、行动和离场变化托住；非虚构段落由材料、因果或实际决策托住。</constraint>
+    <constraint id="NPA-11">对白和论证可以出现岔开、搁置、迟答和不完整表达，但不得因此制造错误事实。</constraint>
+    <constraint id="NPA-12">细节服务空间、身体、关系、任务、材料或后果，不把每个细节都回收成象征。</constraint>
+    <constraint id="NPA-13">严肃感先通过选择、代价和后果成立；高光周围保留普通声音。</constraint>
+    <constraint id="NPA-14">完成当前部分全部结构单元以前不要提前收束；PART_1不得偷跑全篇结论，PART_2不得重复上半部来凑长度。</constraint>
+  </positive_generation_constraints>
+
+  <revision_contract>
+    <allowed_operations>KEEP | DELETE_TAIL | BOUNDED_REPHRASE | REVIEW_FLAG</allowed_operations>
+    <revision_scope>{{REVISION_SCOPE}}</revision_scope>
+    <do_not_change>{{DO_NOT_CHANGE}}</do_not_change>
+  </revision_contract>
+
+  <source_text><![CDATA[{{SOURCE_TEXT_OR_NOT_APPLICABLE}}]]></source_text>
+
+  <phase_protocol>
+    <generation_phase>先只使用Human Writing正向参考和本输入写当前generation_scope；不要提前读取深层审计参考、检测词表、阈值或命中报告。</generation_phase>
+    <continuation_phase>PART_2把same_draft_prior_part当作同一作者同一草稿的既成上文；从seam_state继续，不概述上文，不重做开场，不擅改上半部。</continuation_phase>
+    <freeze_phase>完整稿或双段装配稿完成后，先冻结事实、因果、立场、人物知识、必要结构、接缝状态和已经成立的声音。</freeze_phase>
+    <audit_phase>只有在冻结并装配之后，才按Skill阶段B和C读取修订、接缝与深层审计参考，进行保真的有界修订。</audit_phase>
+    <detector_evidence_phase>如有检测报告，先在不看分数和定位时完成全文冷读并锁定单一主病灶，再核验输入可比性、分段边界和检测独立文学理由；分布式声线或结构问题不得用局部删句冒充修复。</detector_evidence_phase>
+    <post_revision_phase>改后重新冻结完整文本，执行事实、因果、立场、知识、口吻和交付接口回归；任何新检测只作对照证据，不承诺分数或通过。</post_revision_phase>
+  </phase_protocol>
+
+  <final_silent_check>结束前静默核对材料边界、冻结项、当前部分全部结构单元、当前与全篇长度目标、说话位置、接缝和交付格式。不要输出核对过程。若用户只要成稿，只返回当前部分正文。</final_silent_check>
+</natural_prose_request>
