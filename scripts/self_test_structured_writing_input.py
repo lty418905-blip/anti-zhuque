@@ -93,6 +93,17 @@ def main() -> int:
     try:
         run_case(validator, root / "valid-unspecified.json", fixture(), (), True)
 
+        template = json.loads(
+            (base.parent / "assets" / "structured-writing-input-template.json").read_text(encoding="utf-8")
+        )
+        run_case(
+            validator,
+            root / "bad-unfilled-template.json",
+            template,
+            ("unresolved template placeholder",),
+            False,
+        )
+
         explicit = fixture()
         explicit["user_request"]["original_instruction"] = "请写1200到1800字，保留开放结尾。"
         explicit["length_contract"] = {
