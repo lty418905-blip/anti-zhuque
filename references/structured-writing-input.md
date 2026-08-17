@@ -6,6 +6,7 @@ Use this workflow before generating new prose. Its purpose is to separate task c
 
 1. Read the user's current natural-language request and any materials the user supplied or authorized.
 2. Copy `assets/structured-writing-input-template.json` to a task-local JSON file.
+   The untouched template is intentionally invalid; replace every `REPLACE_*` placeholder before validation.
 3. Preserve the user's operative request verbatim in `user_request.original_instruction`.
 4. List every source under `source_contract.materials`. State its authority and permitted use. Use an empty array when no source exists; do not invent a source.
 5. Fill `fact_contract.immutable_facts` and `fact_contract.prohibited_inferences`. If no external facts were supplied, explicitly record that the work must not claim externally verified facts.
