@@ -1,0 +1,21 @@
+{
+  "schema": "SCENE_EVENT_CALL_CARD_V1",
+  "work_id": "REPLACE_ME",
+  "scene_profile_path": "REPLACE_ME",
+  "selected_event_ids": [],
+  "selected_events": [],
+  "total_event_units": 0,
+  "total_load": "NONE",
+  "outline_escalation": "NONE",
+  "writer_boundary": {
+    "full_library_included": false,
+    "second_event_selection_allowed": false,
+    "new_plot_result_allowed": false
+  },
+  "postcheck": {
+    "actual_steps_extracted": false,
+    "state_handshakes_pass": false,
+    "aftereffect_pass": false,
+    "fact_expansion_found": false
+  }
+}

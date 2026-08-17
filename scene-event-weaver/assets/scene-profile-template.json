@@ -1,0 +1,26 @@
+{
+  "schema": "SCENE_EVENT_PROFILE_V1",
+  "work_id": "REPLACE_ME",
+  "scene_ids": ["SCENE-01"],
+  "source_paths": ["REPLACE_ME"],
+  "genre": "REPLACE_ME",
+  "fiction_status": "FICTION",
+  "scene_anchors": ["REPLACE_ME_1", "REPLACE_ME_2", "REPLACE_ME_3", "REPLACE_ME_4"],
+  "participants": [
+    {
+      "id": "CHARACTER-01",
+      "immediate_goal": "REPLACE_ME",
+      "pressure": "REPLACE_ME",
+      "knowledge_limit": "REPLACE_ME",
+      "visible_behavior_range": "REPLACE_ME"
+    }
+  ],
+  "available_objects": ["REPLACE_ME"],
+  "available_spaces": ["REPLACE_ME"],
+  "time_window": "REPLACE_ME",
+  "missing_functions": ["REPLACE_ME"],
+  "immutable_facts": ["REPLACE_ME"],
+  "forbidden_outcomes": ["REPLACE_ME"],
+  "recent_mechanisms": ["NONE"],
+  "max_selected_events": 5
+}

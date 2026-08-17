@@ -1,0 +1,4 @@
+interface:
+  display_name: "Scene Event Weaver"
+  short_description: "Build scene-specific event libraries and causal event chains"
+  default_prompt: "Use $scene-event-weaver to build a scene-specific event library and select events for this draft."
