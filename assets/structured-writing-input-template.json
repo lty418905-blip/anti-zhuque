@@ -1,0 +1,73 @@
+{
+  "schema": "STRUCTURED_WRITING_INPUT_V1",
+  "task_id": "REPLACE_ME",
+  "task_mode": "FICTION_SCENE",
+  "language": "zh-CN",
+  "user_request": {
+    "original_instruction": "REPLACE_WITH_USER_WORDS",
+    "intended_audience": "REPLACE_ME",
+    "purpose": "REPLACE_ME"
+  },
+  "source_contract": {
+    "materials": [],
+    "unlisted_sources_allowed": false
+  },
+  "fact_contract": {
+    "immutable_facts": [
+      "REPLACE_WITH_A_BOUNDARY_OR_NO_EXTERNAL_FACTS_DECLARATION"
+    ],
+    "prohibited_inferences": [
+      "REPLACE_WITH_A_PROHIBITED_INFERENCE"
+    ]
+  },
+  "character_and_pov": {
+    "pov": "REPLACE_ME",
+    "narrator": "REPLACE_ME",
+    "participants": [],
+    "knowledge_boundaries": [
+      "REPLACE_ME"
+    ]
+  },
+  "scenes": [
+    {
+      "scene_id": "SCENE-01",
+      "setting": "REPLACE_ME",
+      "immediate_goal": "REPLACE_ME",
+      "required_beats": [
+        "REPLACE_ME"
+      ],
+      "forbidden_changes": [
+        "REPLACE_ME"
+      ]
+    }
+  ],
+  "event_contract": {
+    "source": "NONE",
+    "selected_event_cards": [],
+    "seed_library_included": false,
+    "full_candidate_library_included": false,
+    "rejected_events_included": false
+  },
+  "positive_style_requirements": [
+    "REPLACE_WITH_POSITIVE_WRITING_DIRECTION"
+  ],
+  "length_contract": {
+    "source": "UNSPECIFIED",
+    "instruction": "UNSPECIFIED",
+    "parsed": {
+      "min": null,
+      "max": null,
+      "unit": null
+    }
+  },
+  "output_contract": {
+    "format": "PLAIN_TEXT",
+    "title_policy": "NONE",
+    "title": null,
+    "additional_requirements": []
+  },
+  "completion_conditions": [
+    "REPLACE_WITH_A_TASK_SPECIFIC_COMPLETION_CONDITION"
+  ],
+  "generation_input_scope": "POSITIVE_WRITING_ONLY"
+}

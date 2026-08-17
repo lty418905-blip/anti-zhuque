@@ -56,6 +56,8 @@ Reject candidates that need a coincidence only to connect, make a competent char
 
 Mark selected entries `SELECTED`; mark the rest `REJECTED` with a short reason. Use `assets/event-call-card-template.json` for the final call card.
 
+When handing events to `natural-prose-audit` or another structured writing workflow, copy only the final call card's `SELECTED` event objects into the destination input. Never copy the seed library, the full candidate library, or rejected events.
+
 ### 5. Compose an event chain only when one event is insufficient
 
 Read `references/chain-composition.md`. A chain must have one root event, two to six visible steps, real state handshakes, at least one unused abort option, one settlement point, and residue that changes a downstream action.

@@ -1,6 +1,6 @@
 ---
 name: natural-prose-audit
-description: Audit and revise Chinese prose for model-like regularity while preserving facts, causality, character voice, and technical accuracy. Use for Chinese fiction or nonfiction when users ask to humanize text, reduce AI or AIGC traces, prepare for Zhuque-style detection, vary overly uniform rhythm, remove templated wording, or perform a post-human-writing audit. Do not claim guaranteed detector evasion or a real Zhuque pass.
+description: Write, audit, and revise Chinese prose while preserving facts, causality, character voice, and technical accuracy. Use when an agent should compile a user's natural-language writing request into a validated structured JSON input before writing, or when users ask to humanize text, reduce model-like regularity, prepare for Zhuque-style detection, vary uniform rhythm, remove templated wording, or perform a post-writing audit. Do not claim guaranteed detector evasion or a real Zhuque pass.
 ---
 
 # Natural Prose Audit
@@ -9,18 +9,29 @@ description: Audit and revise Chinese prose for model-like regularity while pres
 
 ## 选择工作方式
 
+- 新写正文时，先按`references/structured-writing-input.md`把用户自然语言、材料和约束编译成`STRUCTURED_WRITING_INPUT_V1` JSON，运行`python scripts/validate_structured_writing_input.py <输入.json>`，通过后由同一Agent只读取该JSON和其中明确列出的来源写作。不要在生成阶段同时加载详细审计清单。
 - 新写或实质重写任何正文时，先读 `references/human-writing-core.md`，再按下列文体路由读取参考。
 - 小说、故事、虚构散文与对白，读取 `references/human-fiction.md`、`references/fiction-workflow.md`、`references/cognitive-structure.md`和`references/scene-level-audit.md`。若章节由多段连续生成或机械装配，再读取`references/split-chapter-seam.md`。
 - 论坛长帖、公众号、博客与中文长回答，读取 `references/human-forum-prose.md`；现实内容再读 `references/human-reality.md`。
 - 短内容、口播、教程、剧本、对白或特殊格式，读取 `references/human-formats.md`。
 - 初稿完成后才读取 `references/human-revision.md`；不得在第一稿前用详细审稿表压扁声音。
-- 新写正文时，只把`references/external-model-card.md`的正向原则交给外部正文模型，不发送本Skill的审计部分。若调用环境已经把这些正向原则嵌入结构化写作输入，只发送当前任务填好的唯一输入，不再重复附加本Skill或正向卡。不要把词表、阈值或检测规则塞进生成提示。
+- 新写正文时，只把`references/external-model-card.md`的正向原则编译进结构化输入，不发送本Skill的审计部分。若结构化输入已经包含这些正向原则，只发送当前任务填好的唯一JSON及其声明来源，不再重复附加本Skill或正向卡。不要把词表、阈值、检测报告或详细审计规则塞进生成提示。
 - 已有正文需要改稿时，先冻结事实与结构，再做语义审计和有界改写。
 - 用户只问检测原理或策略时，读取 `references/six-dimensions.md`。
 - 用户要求检查或清理文本中的不可见Unicode控制字符，或最终正文已经冻结时，读取`references/unicode-layer-a.md`。Layer A只能在所有语义修订完成后执行；任何后续语义改写都会使旧清理结果失效。
 - 用户提供检测报告、要求比较检测前后版本、出现微小改动后分数反向或拟据检测结果改稿时，完整读取`references/detector-evidence-and-reverse-effect.md`。先在不看分数和高风险定位的条件下完成独立文学冷读，再核验提交输入、可见文本、报告字符和分段是否可比；单次报告不得直接触发正文改动。报告存在公开分段时，还须把分段文字边界映射到源稿UTF-8字节、场景和作者／轮次边界；没有完成这一步，不得选择局部修复范围。
 - 小说、故事、人物对白或第一人称叙事，读取 `references/fiction-workflow.md`。
 - 需要解释本 Skill 与 `qoqu/anti-zhuque` 的关系、许可或能力边界时，读取 `references/source-notes.md`。
+
+## 写前结构化输入
+
+复制`assets/structured-writing-input-template.json`，忠实记录用户原话，再填入来源权威、不可变事实、人物／视角／知识边界、场景、正向文风、禁推断、输出格式、标题策略和完成条件。不要把模板占位符当成默认值。
+
+长度只能来自用户本轮自然语言：用户明确给出长度时，保存原话并设置`length_contract.source=USER_NATURAL_LANGUAGE`；用户没有给出时，固定使用`UNSPECIFIED`与`null`，不得自行设置最低字数、目标字数或范围。数字解析是可选的，且只能解析原话中实际出现的阿拉伯数字。
+
+需要生活事件时，先用独立`scene-event-weaver`完成专属事件库与选择，只把最终调用卡中状态为`SELECTED`的事件复制到`event_contract.selected_event_cards`。禁止装入种子库、完整候选库或`REJECTED`事件。
+
+验证通过后，冻结JSON。写作阶段只读取冻结JSON及其`source_contract.materials`明确列出的来源，按`positive_style_requirements`写正文；不要同时读取`human-revision.md`、六维清单、检测报告或审计输出。正文完成后再进入本Skill的修订与审计阶段。
 
 先冻结事实与章末接口，再按场景写出事件冻结、认知上限和未决残留，检查认知流程复现、对白闭环、动作配对、物件过载、生活后效和结尾总回收；然后按内置 human-writing 规则清理翻案腔、模型黑话、解释尾巴和无功能漂亮句，最后做六维自然度复核。结构与六维代理都不得推翻有效人物声音、必要认识论限定或专业准确性。
 
@@ -115,3 +126,10 @@ python scripts/unicode_layer_a.py clean path/to/text.txt
 clean默认写入新文件，不原地覆盖，并在输出中给出逐码点计数、移除总数和清理后复检。ZWJ、ZWNJ、variation selectors与emoji tag等可能承载语言或emoji语义的字符默认只报告并保留。若Layer A后发生任何语义改写，必须对新冻结全文重新inspect与clean。
 
 Layer A只清理高置信不可见文本控制字符，不做Layer B统计重写，不处理C2PA、EXIF、PDF或图片元数据，不降低采样水印或AI率，也不证明人工写作。完整边界见`references/unicode-layer-a.md`。
+
+## 资源
+
+- `references/structured-writing-input.md`：结构化编译、冻结和同Agent写作流程。
+- `assets/structured-writing-input-template.json`：通用结构化正文输入模板。
+- `scripts/validate_structured_writing_input.py`：结构、长度来源、事件选择和审计隔离校验。
+- `scripts/self_test_structured_writing_input.py`：正向与负向回归测试。

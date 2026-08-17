@@ -6,6 +6,8 @@
 
 仓库根目录是`natural-prose-audit`的最新通用版。它整合Human Writing写作规则，并增加：
 
+- 把用户自然语言、材料与约束编译为可验证的结构化正文输入JSON，再由同一Agent读取该JSON写作；
+- 长度只接受用户自然语言明示，未指定时保持`UNSPECIFIED`，不内置最低字数或默认目标；
 - 中文虚构与非虚构的分文体写作、冷读与有界修订；
 - 认知流程、解释尾巴、对白闭环、动作配对、功能微循环与分布式声线审计；
 - 多段生成和机械装配后的章节接缝检查；
@@ -21,6 +23,14 @@ git clone https://github.com/lty418905-blip/anti-zhuque.git "$env:CODEX_HOME\ski
 
 重启Codex后使用`$natural-prose-audit`。
 
+通用写作入口：复制`assets/structured-writing-input-template.json`，填好后运行：
+
+```powershell
+python scripts\validate_structured_writing_input.py path\to\writing-input.json
+```
+
+验证通过后，同一Agent只读取冻结JSON和其中明确列出的来源写正文。生成阶段不得同时加载详细审计清单；审计在正文完成后另行执行。
+
 ## 2. Scene Event Weaver
 
 `scene-event-weaver/`是独立事件库Skill。装载它的Agent必须先读取当前文章、场景或批准提纲，建立任务专属`scene-profile.json`，然后生成新的`scene-event-library.jsonl`。内置24条内容只是机制种子，不能直接写入正文，也不是事实源。
@@ -34,6 +44,8 @@ git clone https://github.com/lty418905-blip/anti-zhuque.git "$env:CODEX_HOME\ski
 - 场景锚点、重复ID、选择上限、链结构和后效的机械校验；
 - 虚构与叙事非虚构的事实边界，以及科研、医学、法律和关系升级的返回上层规则。
 
+与根Skill联合使用时，只把最终事件调用卡里的`SELECTED`事件装入`STRUCTURED_WRITING_INPUT_V1.event_contract.selected_event_cards`。不得把机制种子、完整候选库或被拒绝事件装入正文输入。
+
 安装第二个Skill时，把仓库中的`scene-event-weaver/`目录复制到：
 
 ```text
@@ -46,6 +58,7 @@ git clone https://github.com/lty418905-blip/anti-zhuque.git "$env:CODEX_HOME\ski
 
 ```powershell
 python scripts\self_test.py
+python scripts\self_test_structured_writing_input.py
 python scene-event-weaver\scripts\self_test.py
 ```
 

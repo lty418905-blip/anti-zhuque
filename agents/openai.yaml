@@ -1,4 +1,4 @@
 interface:
   display_name: "自然小说审计与文本卫生"
-  short_description: "审计中文声线、认知闭环并清理高置信Unicode控制字符"
-  default_prompt: "Use $natural-prose-audit to audit this Chinese prose while preserving facts, causality, technical accuracy, and character voice, then run conservative Unicode Layer A only after the final text is frozen."
+  short_description: "编译结构化正文输入，并审计中文声线与认知闭环"
+  default_prompt: "Use $natural-prose-audit to compile my natural-language request into a validated structured writing JSON, write from that frozen input, and audit only after the draft is complete."
