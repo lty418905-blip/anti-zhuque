@@ -25,6 +25,7 @@ TASK_MODES = {
 }
 TITLE_POLICIES = {"NONE", "USER_PROVIDED", "AGENT_PROPOSED", "PRESERVE_SOURCE"}
 OUTPUT_FORMATS = {"PLAIN_TEXT", "MARKDOWN", "SCRIPT", "CUSTOM"}
+PLACEHOLDER_PREFIXES = ("REPLACE_ME", "REPLACE_WITH_", "FILL_FROM_")
 
 
 def nonempty(value: object) -> bool:
@@ -46,6 +47,19 @@ def find_forbidden_keys(value: object, path: str = "$") -> list[str]:
     elif isinstance(value, list):
         for index, child in enumerate(value):
             errors.extend(find_forbidden_keys(child, f"{path}[{index}]"))
+    return errors
+
+
+def find_unresolved_placeholders(value: object, path: str = "$") -> list[str]:
+    errors: list[str] = []
+    if isinstance(value, dict):
+        for key, child in value.items():
+            errors.extend(find_unresolved_placeholders(child, f"{path}.{key}"))
+    elif isinstance(value, list):
+        for index, child in enumerate(value):
+            errors.extend(find_unresolved_placeholders(child, f"{path}[{index}]"))
+    elif isinstance(value, str) and value.startswith(PLACEHOLDER_PREFIXES):
+        errors.append(f"unresolved template placeholder: {path}")
     return errors
 
 
@@ -129,6 +143,7 @@ def validate(payload: object) -> list[str]:
     if not isinstance(payload, dict):
         return ["root must be a JSON object"]
     errors = find_forbidden_keys(payload)
+    errors.extend(find_unresolved_placeholders(payload))
     missing = sorted(ROOT_REQUIRED - payload.keys())
     if missing:
         errors.append(f"root missing fields: {', '.join(missing)}")
